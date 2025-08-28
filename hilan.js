@@ -342,17 +342,17 @@
                     alert('No valid time periods found after filtering.');
                     return null; // Return null on error
                 }
-                return reports; // Return the filtered report data
+                return reports; // Return the filtered report data 
             } catch (err) {
                 alert('Error parsing report file.'); 
                 return null; // Return null on error
             }
         }
 
-        function fillReport(reports) {
-            // Fill the form with filtered report data
+        function fillReport(reports) {  
+            // Fill the form with filtered report data 
             // Defensive: check for form rows
-            var rows = Array.prototype.slice.call(document.querySelectorAll('form > div.rtl.h-master-outerpage.container-fluid > div:nth-child(6) > div > div.ml-0.mr.mt.row > div > div > div > div.rtl.alignright > div > table > tbody > tr:nth-child(2) > td > div.GBC.ltr.alignleft > div > table > tbody > tr'));
+            var rows = Array.prototype.slice.call(document.querySelectorAll('form > div.rtl.h-master-outerpage.container-fluid > div > div > div > div.ml-0.mr.mt.row > div > div > div > div.rtl.alignright > div > table > tbody > tr:nth-child(2) > td > div.GBC.ltr.alignleft > div > table > tbody > tr'));            
             if (!rows || rows.length === 0) { 
                 alert('No form rows found to fill.');
                 return;
