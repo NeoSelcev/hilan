@@ -4,9 +4,12 @@
 
         function showMenu() {
 
-            // Remove existing menu if present
-            var oldMenu = document.getElementById('hilan-float-menu');
-            if (oldMenu) oldMenu.remove();
+            // Check if menu is already open and close it
+            var existingMenu = document.getElementById('hilan-float-menu');
+            if (existingMenu) {
+                existingMenu.remove();
+                return; // Exit function after closing the menu
+            }
 
             // Create floating menu container
             var menu = document.createElement('div');
@@ -35,7 +38,20 @@
             title.style.letterSpacing = '0.5px';
             title.style.color = '#7bb6ff';
             title.style.textShadow = '0 2px 8px rgba(80,120,255,0.10)';
+            title.style.textAlign = 'left';
             menu.appendChild(title);
+
+            // Function to check current domain
+            function getCurrentDomain() {
+                var currentHost = window.location.hostname;
+                if (currentHost === 'leumicard-sso.net.hilan.co.il') {
+                    return 'max';
+                } else if (currentHost === 'matrix.net.hilan.co.il') {
+                    return 'matrix';
+                } else {
+                    return 'other';
+                }
+            }
 
             function addButton(text, onClick, closeMenu = true) {
                 var btn = document.createElement('button');
@@ -43,7 +59,7 @@
                 btn.style.display = 'block';
                 btn.style.width = '100%';
                 btn.style.margin = '10px 0';
-                btn.style.padding = '12px 0';
+                btn.style.padding = '12px 16px';
                 btn.style.fontSize = '16px';
                 btn.style.background = 'linear-gradient(90deg, #4f8cff 0%, #7bb6ff 100%)';
                 btn.style.color = '#fff';
@@ -53,6 +69,8 @@
                 btn.style.fontWeight = '600';
                 btn.style.boxShadow = '0 2px 8px rgba(80,120,255,0.10)';
                 btn.style.transition = 'background 0.18s cubic-bezier(.4,0,.2,1), transform 0.12s';
+                btn.style.direction = 'ltr';
+                btn.style.textAlign = 'center';
                 btn.onmouseover = function () {
                     btn.style.background = 'linear-gradient(90deg, #7bb6ff 0%, #4f8cff 100%)';
                     btn.style.transform = 'scale(1.03)';
@@ -69,42 +87,43 @@
                 menu.appendChild(btn);
             }
 
-            addButton('Go to Max Hilan - Add daily hours', function () {
-                var url = 'https://leumicard-sso.net.hilan.co.il/Hilannetv2/Attendance/calendarpage.aspx';
-                var urlHost = new URL(url).hostname;
-                var currentHost = window.location.hostname;
-                if (urlHost !== currentHost) {
-                    window.open(url, '_blank');
-                } else {
-                    window.location.href = url;
-                }
-            }, true);
-            addButton('Go to Max Hilan - Download report', function () {
-                var url = 'https://leumicard-sso.net.hilan.co.il/Hilannetv2/Attendance/AttendanceApproval.aspx';
-                var urlHost = new URL(url).hostname;
-                var currentHost = window.location.hostname;
-                if (urlHost !== currentHost) {
-                    window.open(url, '_blank');
-                } else {
-                    window.location.href = url;
-                }
-            }, true);
-            addButton('Go to Matrix Hilan', function () {
-                var url = 'https://matrix.net.hilan.co.il/Hilannetv2/Attendance/calendarpage.aspx?itemId=47';
-                var urlHost = new URL(url).hostname;
-                var currentHost = window.location.hostname;
-                if (urlHost !== currentHost) {
-                    window.open(url, '_blank');
-                } else {
-                    window.location.href = url;
-                }
-            }, true);
-            addButton('Select the Month', function () {
-                selectMonth();
-            }, true);
-            addButton('Upload Report and Do the Magic', function () {
-                doMagic();
-            }, true);
+            var currentDomain = getCurrentDomain();
+
+            // Show buttons based on current domain
+            if (currentDomain === 'max') {
+                // On Max Hilan domain
+                addButton('Max Hilan - Go to "Daily report"', function () {
+                    window.location.href = 'https://leumicard-sso.net.hilan.co.il/Hilannetv2/Attendance/calendarpage.aspx';
+                }, true);
+                addButton('Max Hilan - Go to "Download monthly report"', function () {
+                    window.location.href = 'https://leumicard-sso.net.hilan.co.il/Hilannetv2/Attendance/AttendanceApproval.aspx';
+                }, true);
+                addButton('Go to Matrix Hilan', function () {
+                    window.open('https://matrix.net.hilan.co.il/Hilannetv2/Attendance/calendarpage.aspx?itemId=47', '_blank');
+                }, true);
+            } else if (currentDomain === 'matrix') {
+                // On Matrix Hilan domain
+                addButton('Max Hilan - Go to "Daily report"', function () {
+                    window.open('https://leumicard-sso.net.hilan.co.il/Hilannetv2/Attendance/calendarpage.aspx', '_blank');
+                }, true);
+                addButton('Matrix Hilan - Go to "Daily report"', function () {
+                    window.location.href = 'https://matrix.net.hilan.co.il/Hilannetv2/Attendance/calendarpage.aspx?itemId=47';
+                }, true);
+                addButton('Matrix Hilan - Select month', function () {
+                    selectMonth();
+                }, true);
+                addButton('Matrix Hilan - Upload and Do the Magic', function () {
+                    doMagic();
+                }, true);
+            } else {
+                // On other domains - show navigation links only
+                addButton('Max Hilan - Go to "Daily report"', function () {
+                    window.open('https://leumicard-sso.net.hilan.co.il/Hilannetv2/Attendance/calendarpage.aspx', '_blank');
+                }, true);
+                addButton('Go to Matrix Hilan', function () {
+                    window.open('https://matrix.net.hilan.co.il/Hilannetv2/Attendance/calendarpage.aspx?itemId=47', '_blank');
+                }, true);
+            }
 
 
             // Close button
@@ -127,79 +146,67 @@
             document.body.appendChild(menu);
         }
 
-        function selectMonth() {
-            // First select all days
-            document.querySelectorAll('#calendar_container > tbody > tr > td:nth-child(-n+6).cDIES[ondblclick]:not([title*=":"]):not([title*="."]):not([title*=","]):not([title*=" - "])').forEach(e => e.click());
-
+        function selectMonth() { 
             // Set up observer for the XSRF token element
-            const tokenInput = document.querySelector('#H-XSRF-Token');
-            if (!tokenInput) {
-                document.querySelector('#ctl00_mp_RefreshSelectedDays').click();
-                setTimeout(() => {
-                    alert('Month selection completed. You can now upload a report.');
-                }, 1000);
-                return;
-            }
-
-            const observer = new MutationObserver((mutations, obs) => {
-                mutations.forEach(mutation => {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'tabindex') {
-                        const tabindex = tokenInput.getAttribute('tabindex');
-                        if (tabindex === '0') {
-                            // Form is ready again
-                            obs.disconnect();
-                            alert('Month selection completed. You can now upload a report.');
+            var checkLoadingTimeout = setTimeout(function() {
+                clearInterval(checkLoadingTimeout);                
+                const tokenInput = document.querySelector('#H-XSRF-Token');
+                if (tokenInput) {
+                    document.querySelector('#ctl00_mp_RefreshSelectedDays').click();
+                    var checkCount = 0;
+                    var maxChecks = 50; // 5 seconds (50 * 100ms)
+                    var checkLoading = setInterval(function() {
+                        var loadingBackdrop = document.querySelector('body > .h-loading-app-backdrop');
+                        checkCount++;    
+                        if (!loadingBackdrop) {
+                            clearInterval(checkLoading);
+                            confirm('Month selection completed. You can now upload a report.');
+                        } else if (checkCount >= maxChecks) {
+                            clearInterval(checkLoading);
+                            confirm('Month selection completed. But UI is not responsive, so upload the report when the page will finish updating.');
                         }
-                    }
-                });
-            });
+                    }, 100);
+                }
+            }, 100);
 
-            // Start observing the token input for tabindex changes
-            observer.observe(tokenInput, {
-                attributes: true,
-                attributeFilter: ['tabindex']
-            });
-
+            // Select all days
+            document.querySelectorAll('#calendar_container > tbody > tr > td:nth-child(-n+6).cDIES[ondblclick]:not(.CSD):not([title*=":"]):not([title*="."]):not([title*=","]):not([title*=" - "]), #calendar_container > tbody > tr > td:nth-child(-n+6).cED[ondblclick]:not(.CSD):not([title*=":"]):not([title*="."]):not([title*=","]):not([title*=" - "])').forEach(e => e.click());
             // Now trigger the refresh
             document.querySelector('#ctl00_mp_RefreshSelectedDays').click();
-        }
+            // const observer = new MutationObserver((mutations, obs) => {
+            //     mutations.forEach(mutation => {
+            //         if (mutation.type === 'attributes' && mutation.attributeName === 'tabindex') {
+            //             const tabindex = tokenInput.getAttribute('tabindex');
+            //             if (tabindex === '0') {
+            //                 // Form is ready again
+            //                 obs.disconnect();
+                            
+            //                 // Wait for loading backdrop to disappear
+            //                 var checkCount = 0;
+            //                 var maxChecks = 50; // 5 seconds (50 * 100ms)
+                            
+            //                 var checkLoading = setInterval(function() {
+            //                     var loadingBackdrop = document.querySelector('body > .h-loading-app-backdrop');
+            //                     checkCount++;
+                                
+            //                     if (!loadingBackdrop) {
+            //                         clearInterval(checkLoading);
+            //                         alert('Month selection completed. You can now upload a report.');
+            //                     } else if (checkCount >= maxChecks) {
+            //                         clearInterval(checkLoading);
+            //                         alert('Month selection completed. But UI is not responsive, so upload the report when the page will finish updating.');
+            //                     }
+            //                 }, 100);
+            //             }
+            //         }
+            //     });
+            // });
 
-        function selectMonthAndUpload() {
-            // First select all days
-            document.querySelectorAll('#calendar_container > tbody > tr > td:nth-child(-n+6).cDIES[ondblclick]:not([title*=":"]):not([title*="."]):not([title*=","]):not([title*=" - "])').forEach(e => e.click());
-
-            // Set up observer for the XSRF token element
-            const tokenInput = document.querySelector('#H-XSRF-Token');
-            if (!tokenInput) {
-                document.querySelector('#ctl00_mp_RefreshSelectedDays').click();
-                setTimeout(() => {
-                    Warning('Automation failed: upload the file manually');
-                }, 1000);
-                return;
-            }
-
-            const observer = new MutationObserver((mutations, obs) => {
-                mutations.forEach(mutation => {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'tabindex') {
-                        const tabindex = tokenInput.getAttribute('tabindex');
-                        if (tabindex === '0') {
-                            // Form is ready again
-                            obs.disconnect();
-                            // Start the upload process
-                            doMagic();
-                        }
-                    }
-                });
-            });
-
-            // Start observing the token input for tabindex changes
-            observer.observe(tokenInput, {
-                attributes: true,
-                attributeFilter: ['tabindex']
-            });
-
-            // Now trigger the refresh
-            document.querySelector('#ctl00_mp_RefreshSelectedDays').click();
+            // // Start observing the token input for tabindex changes
+            // observer.observe(tokenInput, {
+            //     attributes: true,
+            //     attributeFilter: ['tabindex']
+            // });            
         }
 
         function doMagic() {
@@ -352,7 +359,7 @@
         function fillReport(reports) {  
             // Fill the form with filtered report data 
             // Defensive: check for form rows
-            var rows = Array.prototype.slice.call(document.querySelectorAll('form > div.rtl.h-master-outerpage.container-fluid > div > div > div > div.ml-0.mr.mt.row > div > div > div > div.rtl.alignright > div > table > tbody > tr:nth-child(2) > td > div.GBC.ltr.alignleft > div > table > tbody > tr'));            
+            var rows = Array.prototype.slice.call(document.querySelectorAll('form > div.rtl.h-master-outerpage.container-fluid > div > div > div > div.ml-0.mr.mt.row > div > div > div > div.rtl.alignright > div > div > table > tbody > tr:nth-child(2) > td > div.GBC.ltr.alignleft > div > table > tbody > tr'));            
             if (!rows || rows.length === 0) { 
                 alert('No form rows found to fill.');
                 return;
@@ -388,23 +395,25 @@
                 currentDayReport.timePeriods.forEach((timePeriod, index) => {
                     try {
                         // For multiple periods, simulate click to add new row
-                        if (index > 0) {
-                            setTimeout(function () {
-                                var dummyString = "DO NOT ERASE"
-                                dummyString = dummyString.substring(0, dummyString.length);
-                                dummyString += "";
-                            }, 100);
-                            currnetDayTimeRow.querySelector('td.BBCG.ImageCell > span > input[type=image]').click();
-                            setTimeout(function () {
-                                var dummyString = "DO NOT ERASE"
-                                dummyString = dummyString.substring(0, dummyString.length);
-                                dummyString += "";
-                            }, 100);
+                        if(timePeriod.start && timePeriod.end) {
+                            if (index > 0) {
+                                setTimeout(function () {
+                                    var dummyString = "DO NOT ERASE"
+                                    dummyString = dummyString.substring(0, dummyString.length);
+                                    dummyString += "";
+                                }, 100);
+                                currnetDayTimeRow.querySelector('td.BBCG.ImageCell > span > span.fh-plus-b').click();
+                                setTimeout(function () {
+                                    var dummyString = "DO NOT ERASE"
+                                    dummyString = dummyString.substring(0, dummyString.length);
+                                    dummyString += "";
+                                }, 100);
+                            }
+                            // Set start and end time values in the form
+                            currnetDayTimeRow.querySelector('td:nth-child(2) > table > tbody > tr:nth-child(' + (index + 1) + ') > td:nth-child(3) > table > tbody > tr:nth-child(1) > td:nth-child(3) > span').click();
+                            currnetDayTimeRow.querySelector('td:nth-child(2) > table > tbody > tr:nth-child(' + (index + 1) + ') > td:nth-child(7) > input').value = timePeriod.start;
+                            currnetDayTimeRow.querySelector('td:nth-child(2) > table > tbody > tr:nth-child(' + (index + 1) + ') > td:nth-child(8) > input').value = timePeriod.end;
                         }
-                        // Set start and end time values in the form
-                        currnetDayTimeRow.querySelector('td:nth-child(2) > table > tbody > tr:nth-child(' + (index + 1) + ') > td:nth-child(3) > table > tbody > tr:nth-child(1) > td:nth-child(3) > span').click();
-                        currnetDayTimeRow.querySelector('td:nth-child(2) > table > tbody > tr:nth-child(' + (index + 1) + ') > td:nth-child(7) > input').value = timePeriod.start;
-                        currnetDayTimeRow.querySelector('td:nth-child(2) > table > tbody > tr:nth-child(' + (index + 1) + ') > td:nth-child(8) > input').value = timePeriod.end;
                     } catch (err) {
                         // skip row if DOM structure is unexpected
                     }
