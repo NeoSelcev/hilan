@@ -1,10 +1,10 @@
 (
     function () {
         'use strict';
-
+ 
         function showMenu() {
 
-            // Check if menu is already open and close it
+            // Check  menu is already open and close it
             var existingMenu = document.getElementById('hilan-float-menu');
             if (existingMenu) {
                 existingMenu.remove();
@@ -359,11 +359,31 @@
         function fillReport(reports) {  
             // Fill the form with filtered report data 
             // Defensive: check for form rows
-            var rows = Array.prototype.slice.call(document.querySelectorAll('form > div.rtl.h-master-outerpage.container-fluid > div > div > div > div.ml-0.mr.mt.row > div > div > div > div.rtl.alignright > div > div > table > tbody > tr:nth-child(2) > td > div.GBC.ltr.alignleft > div > table > tbody > tr'));            
-            if (!rows || rows.length === 0) { 
-                alert('No form rows found to fill.');
-                return;
+            // Try multiple selector strategies to find the form rows
+            var rows = Array.prototype.slice.call(document.querySelectorAll('form div.GBC.ltr.alignleft > div > table > tbody > tr'));
+            
+            // If the simplified selector doesn't work, try the original specific one
+            if (!rows || rows.length === 0) {
+                rows = Array.prototype.slice.call(document.querySelectorAll('form > div.rtl.h-master-outerpage.container-fluid > div > div > div > div.ml-0.mr.mt.row > div > div > div > div.rtl.alignright > div > div > table > tbody > tr:nth-child(2) > td > div.GBC.ltr.alignleft > div > table > tbody > tr'));
             }
+            
+            // If still not found, try an even more generic selector
+            if (!rows || rows.length === 0) {
+                rows = Array.prototype.slice.call(document.querySelectorAll('td.regularItemCell.ItemBorder > span'));
+                if (rows && rows.length > 0) {
+                    // Map back to row elements
+                    rows = rows.map(span => span.closest('tr')).filter(tr => tr);
+                }
+            }   
+            
+            if (!rows || rows.length === 0) { 
+                console.error('No form rows found. Tried multiple selectors.');
+                alert('No form rows found to fill. Please make sure you are on the correct page with the attendance form visible.');
+                return;
+            }  
+            
+            console.log('Found ' + rows.length + ' form rows to process');
+        
             
             for (var i = 0; i < rows.length; i++) {
                 var row = rows[i];
